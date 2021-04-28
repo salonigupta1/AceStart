@@ -1,5 +1,11 @@
+import 'package:ace_start/feedPages/feedpages.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:ace_start/backend/auth.dart';
+import 'package:ace_start/backend/user.dart';
+import 'package:ace_start/backend/database.dart';
+
+QuerySnapshot userSnapshot;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -7,6 +13,47 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPage extends State<LoginPage> {
+  DatabaseMethods databaseMethods = new DatabaseMethods();
+  bool isLoading = false;
+  AuthMethods authMethods = new AuthMethods();
+  final formKey = GlobalKey<FormState>();
+  TextEditingController emailTextEditingController =
+      new TextEditingController();
+  TextEditingController passwordTextEditingController =
+      new TextEditingController();
+  signMeIN() {
+    if (formKey.currentState.validate()) {
+      setState(() {
+        isLoading = true;
+      });
+
+      authMethods
+          .signInWithEmailAndPassword(emailTextEditingController.text,
+              passwordTextEditingController.text)
+          .then((val) {
+        userId = val.userId;
+
+        databaseMethods.getUserByUserId(userId).then((val) {
+          setState(() {
+            userSnapshot = val;
+          });
+
+          setState(() {
+            userId = userSnapshot.documents[0].data["user_id"];
+            userName = userSnapshot.documents[0].data["user_name"];
+            userEmail = userSnapshot.documents[0].data["email"];
+            userPropic = userSnapshot.documents[0].data["profile_picture"];
+          });
+        });
+
+        if (val != null) {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => FeedPage()));
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,133 +113,153 @@ class _LoginPage extends State<LoginPage> {
                           height: MediaQuery.of(context).size.height / 3,
                         ),
                       ),
-                      Column(
+                      Form(
+                        key: formKey,
+                        child: Column(
 //                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          SizedBox(
-                            height: 15,
-                          ),
-                          // Text('Hello',
-                          //     style: GoogleFonts.roboto(
-                          //       fontSize: 20,
-                          //       color: Color(0xffC64B8A),
-                          //       fontWeight: FontWeight.bold,
-                          //     )),
-                          // Text('Sign into your Account',
-                          //     style: GoogleFonts.roboto(
-                          //         fontSize: 20,
-                          //         color: Color(0xffC64B8A),
-                          //         fontWeight: FontWeight.bold)),
-                          SizedBox(
-                            height: 30,
-                          ),
-                          Padding(
-                              padding: EdgeInsets.only(right: 40, bottom: 10),
-                              child: Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.08,
-                                width: MediaQuery.of(context).size.width - 40,
-                                child: Material(
-                                  elevation: 10,
-                                  color: Color(0xff943A76),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      // bottomRight: Radius.circular00),
-                                      topRight: Radius.circular(35),
+                          children: <Widget>[
+                            SizedBox(
+                              height: 15,
+                            ),
+                            // Text('Hello',
+                            //     style: GoogleFonts.roboto(
+                            //       fontSize: 20,
+                            //       color: Color(0xffC64B8A),
+                            //       fontWeight: FontWeight.bold,
+                            //     )),
+                            // Text('Sign into your Account',
+                            //     style: GoogleFonts.roboto(
+                            //         fontSize: 20,
+                            //         color: Color(0xffC64B8A),
+                            //         fontWeight: FontWeight.bold)),
+                            SizedBox(
+                              height: 30,
+                            ),
+                            Padding(
+                                padding: EdgeInsets.only(right: 40, bottom: 10),
+                                child: Container(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.08,
+                                  width: MediaQuery.of(context).size.width - 40,
+                                  child: Material(
+                                    elevation: 10,
+                                    color: Color(0xff943A76),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        // bottomRight: Radius.circular00),
+                                        topRight: Radius.circular(35),
+                                      ),
                                     ),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                        left: 20,
-                                        right: 20,
-                                        top: 10,
-                                        bottom: 10),
-                                    child: TextField(
-                                      keyboardType: TextInputType.emailAddress,
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        labelText: "Email",
-                                        labelStyle: TextStyle(
-                                            color: Colors.black, fontSize: 14),
-                                        // hintText: "Email",
-                                        // hintStyle: TextStyle(color: Color(0xFFE1E1E1), fontSize: 14)
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 20,
+                                          right: 20,
+                                          top: 10,
+                                          bottom: 10),
+                                      child: TextFormField(
+                                        controller: emailTextEditingController,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        validator: (val) {
+                                          return RegExp(
+                                                      r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
+                                                  .hasMatch(val)
+                                              ? null
+                                              : "PLEASE PROVIDE A VALID EMAIL ID";
+                                        },
+                                        decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          labelText: "Email",
+                                          labelStyle: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14),
+                                          // hintText: "Email",
+                                          // hintStyle: TextStyle(color: Color(0xFFE1E1E1), fontSize: 14)
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(right: 40, bottom: 5),
-                              child: Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.08,
-                                width: MediaQuery.of(context).size.width - 40,
-                                child: Material(
-                                  elevation: 10,
-                                  color: Color(0xff943A76),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      // bottomRight: Radius.circular00),
-                                      topRight: Radius.circular(35),
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(right: 40, bottom: 5),
+                                child: Container(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.08,
+                                  width: MediaQuery.of(context).size.width - 40,
+                                  child: Material(
+                                    elevation: 10,
+                                    color: Color(0xff943A76),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        // bottomRight: Radius.circular00),
+                                        topRight: Radius.circular(35),
+                                      ),
                                     ),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                        left: 20,
-                                        right: 20,
-                                        top: 10,
-                                        bottom: 10),
-                                    child: TextField(
-                                      obscureText: true,
-                                      keyboardType: TextInputType.emailAddress,
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        labelText: "Password",
-                                        labelStyle: TextStyle(
-                                            color: Colors.black, fontSize: 14),
-                                        // hintText: "Email",
-                                        // hintStyle: TextStyle(color: Color(0xFFE1E1E1), fontSize: 14)
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 20,
+                                          right: 20,
+                                          top: 10,
+                                          bottom: 10),
+                                      child: TextFormField(
+                                        controller:
+                                            passwordTextEditingController,
+                                        obscureText: true,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        validator: (val) {
+                                          return val.length > 6
+                                              ? null
+                                              : "PLEASE TYPE LONGER PASSWORD";
+                                        },
+                                        decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          labelText: "Password",
+                                          labelStyle: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14),
+                                          // hintText: "Email",
+                                          // hintStyle: TextStyle(color: Color(0xFFE1E1E1), fontSize: 14)
+                                        ),
                                       ),
                                     ),
                                   ),
+                                )),
+                            SizedBox(
+                              height: 40,
+                            ),
+                            Align(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  'Forget your password?',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                )),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                              width: 150,
+                              child: MaterialButton(
+                                color: Colors.black,
+                                splashColor: Colors.blue,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        new BorderRadius.circular(18.0),
+                                    side: BorderSide(color: Color(0xffC64B8A))),
+                                onPressed: () {
+                                  signMeIN();
+                                },
+                                child: Text(
+                                  "Login",
+                                  style: TextStyle(color: Color(0xffC64B8A)),
                                 ),
-                              )),
-                          SizedBox(
-                            height: 40,
-                          ),
-                          Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Forget your password?',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              )),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Container(
-                            width: 150,
-                            child: MaterialButton(
-                              color: Colors.black,
-                              splashColor: Colors.blue,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: new BorderRadius.circular(18.0),
-                                  side: BorderSide(color: Color(0xffC64B8A))),
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => LoginPage()));
-                              },
-                              child: Text(
-                                "Login",
-                                style: TextStyle(color: Color(0xffC64B8A)),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                        ],
+                            SizedBox(
+                              height: 5,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   )),
