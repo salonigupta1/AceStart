@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "519254777721",
+    "firebase_url": "https://acestart-1b4b7-default-rtdb.firebaseio.com",
     "project_id": "acestart-1b4b7",
     "storage_bucket": "acestart-1b4b7.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "519254777721-1fmuq94kkpvhm9t12qtsou8al65bkep1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ace_start",
+            "certificate_hash": "39244c8b01f047c2a954c6afc5e03ecdf34d938f"
+          }
+        },
         {
           "client_id": "519254777721-gu68oaufa07dv2bu38jbpo9at9pae1um.apps.googleusercontent.com",
           "client_type": 3
