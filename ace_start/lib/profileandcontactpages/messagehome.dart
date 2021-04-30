@@ -62,7 +62,7 @@ class ChathomeState extends State<Chathome> {
     return new AppBar(
       centerTitle: true,
       title: _appBarTitle,
-      backgroundColor: Color(0xff2E174D),
+      backgroundColor: Color(0xff86A7BA),
       leading: new IconButton(
         icon: _searchIcon,
         onPressed: _searchPressed,
@@ -78,8 +78,8 @@ class ChathomeState extends State<Chathome> {
             .n
             .toLowerCase()
             .contains(_searchText.toLowerCase())) {
-          tempList
-              .add(new DynamicWidget(filteredNames[i].n, filteredNames[i].id));
+          tempList.add(new DynamicWidget(
+              filteredNames[i].n, filteredNames[i].id, filteredNames[i].image));
         }
       }
       filteredNames = tempList;
@@ -87,7 +87,8 @@ class ChathomeState extends State<Chathome> {
     return ListView.builder(
       itemCount: names == null ? 0 : filteredNames.length,
       itemBuilder: (BuildContext context, int index) {
-        return DynamicWidget(filteredNames[index].n, filteredNames[index].id);
+        return DynamicWidget(filteredNames[index].n, filteredNames[index].id,
+            filteredNames[index].image);
       },
     );
   }
@@ -119,8 +120,10 @@ class ChathomeState extends State<Chathome> {
     var x = friendsSnapshot.documents[0].data["friends"];
     for (int i = 0; i < x.length; i++) {
       nameSnapshot = await databaseMethods.getUserByUserId(x[i]);
-      tempList.add(
-          new DynamicWidget(nameSnapshot.documents[0].data["user_name"], x[i]));
+      tempList.add(new DynamicWidget(
+          nameSnapshot.documents[0].data["user_name"],
+          x[i],
+          nameSnapshot.documents[0].data["profile_picture"]));
     }
 
     setState(() {
@@ -133,10 +136,11 @@ class ChathomeState extends State<Chathome> {
 
 // ignore: must_be_immutable
 class DynamicWidget extends StatelessWidget {
-  String n, id;
-  DynamicWidget(String name, String id) {
+  String n, id, image;
+  DynamicWidget(String name, String id, String image) {
     this.n = name;
     this.id = id;
+    this.image = image;
   }
 
   @override
@@ -145,7 +149,8 @@ class DynamicWidget extends StatelessWidget {
       margin: new EdgeInsets.only(left: 15, right: 15, top: 4, bottom: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5.0),
-        color: Colors.grey[300],
+        // border: Border.all(color: Colors.black38),
+        color: Colors.white10,
       ),
       child: new TextButton(
         onPressed: () {
@@ -155,6 +160,11 @@ class DynamicWidget extends StatelessWidget {
                   builder: (context) => ChatHomePage(friendsuserid: id)));
         },
         child: new ListTile(
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(image == null
+                ? "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png"
+                : image),
+          ),
           title: Text(
             n,
             style: TextStyle(color: Colors.black),

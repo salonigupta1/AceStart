@@ -1,11 +1,15 @@
+import 'package:flutter/cupertino.dart';
+
 class User {
   String userId;
   User({this.userId});
 }
 
 String userId;
+bool loggedIn = false;
 String userName;
 String userEmail;
 String userPhoneNumber;
+String userBio;
 String userPropic =
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png";
+    "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png";

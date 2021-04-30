@@ -1,11 +1,15 @@
 import 'package:ace_start/backend/database.dart';
 import 'package:ace_start/backend/user.dart';
+import 'package:ace_start/feedPages/setting.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 DatabaseMethods databaseMethods = new DatabaseMethods();
 QuerySnapshot userSnapshot;
-String name = "df", email = "df", profilepic = userPropic, bio = "sdfd";
+String name = userName,
+    email = userEmail,
+    profilepic = userPropic,
+    bio = userBio;
 bool connected = false;
 bool mypro = false;
 
@@ -26,13 +30,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
-    if (usid != userId) {
+    if (userId != usid) {
+      print(userId);
+      print(usid);
       mypro = false;
       this._fetchuserInfo(usid);
       this.findconnection(userId, usid);
     } else {
+      print(userId);
+      print(usid);
       mypro = true;
     }
+
     super.initState();
   }
 
@@ -51,8 +60,11 @@ class _ProfilePageState extends State<ProfilePage> {
   void _updateList() async {
     QuerySnapshot snapshotss = await databaseMethods.getUserByUserId(userId);
     String docId = snapshotss.documents[0].documentID;
+    DocumentSnapshot docSnap =
+        await databaseMethods.getDocumentGlobal("user_information", docId);
+    print(docId);
 
-    List<dynamic> snap = snapshotss.documents[0]["friends"];
+    List<dynamic> snap = docSnap.data['friends'];
     snap.add(
       usid,
     );
@@ -64,10 +76,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
     snapshotss = await databaseMethods.getUserByUserId(usid);
     docId = snapshotss.documents[0].documentID;
-    print(usid);
-    print(userId);
+    print(docId);
+    docSnap =
+        await databaseMethods.getDocumentGlobal("user_information", docId);
 
-    snap = snapshotss.documents[0]["friends"];
+    snap = docSnap.data["friends"];
     snap.add(
       userId,
     );
@@ -92,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
     findconnection(u1, u2);
   }
 
-  void _fetchuserInfo(String usid) {
+  void _fetchuserInfo(String usid) async {
     databaseMethods.getUserByUserId(usid).then((val) {
       setState(() {
         userSnapshot = val;
@@ -112,10 +125,27 @@ class _ProfilePageState extends State<ProfilePage> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text(
-            "Profile",
-            style: TextStyle(fontSize: 18.0),
+          title: Center(
+            child: Text(
+              mypro ? userName : name,
+              style: TextStyle(fontSize: 18.0),
+            ),
           ),
+          actions: <Widget>[
+            if (mypro)
+              IconButton(
+                icon: Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  // do something
+                  print("Tapped");
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => SettingPage()));
+                },
+              ),
+          ],
         ),
         backgroundColor: Colors.blue[300],
         body: SafeArea(
@@ -125,10 +155,16 @@ class _ProfilePageState extends State<ProfilePage> {
               children: <Widget>[
                 CircleAvatar(
                   radius: 80,
-                  backgroundImage: NetworkImage(profilepic),
+                  backgroundImage: mypro
+                      ? NetworkImage(userPropic == null
+                          ? "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png"
+                          : userPropic)
+                      : NetworkImage(profilepic == null
+                          ? "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png"
+                          : profilepic),
                 ),
                 Text(
-                  name,
+                  mypro ? userName : name,
                   style: TextStyle(
                     fontFamily: 'SourceSansPro',
                     fontSize: 25,
@@ -143,7 +179,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width - 50,
-                  child: Text(bio),
+                  height: 50,
+                  child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Text(mypro ? userBio : bio,
+                          style: TextStyle(color: Colors.black26))),
                 ),
                 Card(
                     color: Colors.white,
@@ -155,7 +195,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: Colors.teal[900],
                       ),
                       title: Text(
-                        email,
+                        mypro ? userEmail : email,
                         style:
                             TextStyle(fontFamily: 'BalooBhai', fontSize: 20.0),
                       ),
@@ -171,6 +211,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     title: GestureDetector(
                       onTap: () {
+                        print("tapped");
+                        print(connected);
+                        print(mypro);
                         if (!connected && !mypro) {
                           makenewroom(usid, userId);
                         }

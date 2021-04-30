@@ -23,8 +23,8 @@ class AnimatedAppBar extends StatelessWidget {
       height: 80,
       decoration: BoxDecoration(
           gradient: LinearGradient(colors: <Color>[
-        Color(0xff2E174D),
-        Color(0xffC64B8A),
+        Color(0xff7399AF),
+        Colors.white,
       ])),
       child: AnimatedBuilder(
         animation: colorAnimationController,
@@ -50,7 +50,7 @@ class AnimatedAppBar extends StatelessWidget {
                     letterSpacing: 1),
               ),
               Text(
-                userName,
+                userName == null ? "" : userName,
                 style: TextStyle(
                     color: workOutTween.value,
                     fontWeight: FontWeight.bold,
@@ -60,13 +60,13 @@ class AnimatedAppBar extends StatelessWidget {
             ],
           ),
           actions: <Widget>[
-            Icon(
-              Icons.notifications,
-              color: iconTween.value,
-            ),
-            SizedBox(
-              width: 5,
-            ),
+            // Icon(
+            //   Icons.notifications,
+            //   color: iconTween.value,
+            // ),
+            // SizedBox(
+            //   width: 5,
+            // ),
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -76,7 +76,7 @@ class AnimatedAppBar extends StatelessWidget {
               },
               child: Icon(
                 Icons.message,
-                color: iconTween.value,
+                color: Colors.black38,
               ),
             ),
             SizedBox(

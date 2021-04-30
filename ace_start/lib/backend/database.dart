@@ -43,6 +43,10 @@ class DatabaseMethods {
     return Firestore.instance.collection("chat_room").document(docId).get();
   }
 
+  getDocumentGlobal(coll, docId) {
+    return Firestore.instance.collection(coll).document(docId).get();
+  }
+
   updateMessage(usermap, documentIds) async {
     return Firestore.instance
         .collection("chat_room")
@@ -50,6 +54,34 @@ class DatabaseMethods {
         .updateData({
       "messages": usermap,
     });
+  }
+
+  updateBio(usermap, docId) async {
+    return Firestore.instance
+        .collection("user_information")
+        .document(docId)
+        .updateData({"bio": usermap});
+  }
+
+  updateBioFromPost(usermap, docId) async {
+    return Firestore.instance
+        .collection("post")
+        .document(docId)
+        .updateData({"bio": usermap});
+  }
+
+  updateProfilePictureFromPost(usermap, docId) async {
+    return Firestore.instance
+        .collection("post")
+        .document(docId)
+        .updateData({"profile_picture": usermap});
+  }
+
+  updateProfilePicture(usermap, docId) async {
+    return Firestore.instance
+        .collection("user_information")
+        .document(docId)
+        .updateData({"profile_picture": usermap});
   }
 
   updatePosts(postmap) async {

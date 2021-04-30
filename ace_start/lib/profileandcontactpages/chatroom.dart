@@ -39,7 +39,7 @@ class ChatMessage extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             color: (messageType == "receiver"
                 ? Colors.grey.shade200
-                : Colors.blue[200]),
+                : Color(0xff86A7BA)),
           ),
           padding: EdgeInsets.all(16),
           child: Text(
@@ -75,24 +75,24 @@ class _ChatHomePageState extends State<ChatHomePage> {
           .snapshots(),
       builder:
           (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        List<dynamic> lists;
         if (snapshot.data != null) {
-          final List<dynamic> lists = snapshot.data["messages"];
-
-          return ListView.builder(
-            itemCount: lists == null ? 0 : lists.length,
-            itemBuilder: (BuildContext context, int index) {
-              String type;
-              if (lists[index]["user_id"] != userId) {
-                type = "receiver";
-              } else {
-                type = "sender";
-              }
-              return (ChatMessage(lists[index]["content"], type));
-            },
-          );
+          lists = snapshot.data["messages"];
         } else {
-          return null;
+          lists = null;
         }
+        return ListView.builder(
+          itemCount: lists == null ? 0 : lists.length,
+          itemBuilder: (BuildContext context, int index) {
+            String type;
+            if (lists[index]["user_id"] != userId) {
+              type = "receiver";
+            } else {
+              type = "sender";
+            }
+            return (ChatMessage(lists[index]["content"], type));
+          },
+        );
       },
     );
   }
@@ -102,6 +102,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Chat Screen"),
+        backgroundColor: Color(0xff86A7BA),
       ),
       body: Stack(
         children: <Widget>[
@@ -139,7 +140,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                       color: Colors.white,
                       size: 18,
                     ),
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Color(0xff86A7BA),
                     elevation: 0,
                   ),
                 ],
