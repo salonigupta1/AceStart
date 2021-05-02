@@ -69,32 +69,31 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
   Widget _buildList() {
     return StreamBuilder(
-      stream: Firestore.instance
-          .collection("chat_room")
-          .document(docId)
-          .snapshots(),
-      builder:
-          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        List<dynamic> lists;
-        if (snapshot.data != null) {
-          lists = snapshot.data["messages"];
-        } else {
-          lists = null;
-        }
-        return ListView.builder(
-          itemCount: lists == null ? 0 : lists.length,
-          itemBuilder: (BuildContext context, int index) {
-            String type;
-            if (lists[index]["user_id"] != userId) {
-              type = "receiver";
-            } else {
-              type = "sender";
-            }
-            return (ChatMessage(lists[index]["content"], type));
-          },
-        );
-      },
-    );
+        stream: Firestore.instance
+            .collection("chat_room")
+            .document(docId)
+            .snapshots(),
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          List<dynamic> lists;
+          if (snapshot.data != null) {
+            lists = snapshot.data["messages"];
+            return ListView.builder(
+              itemCount: lists == null ? 0 : lists.length,
+              itemBuilder: (BuildContext context, int index) {
+                String type;
+                if (lists[index]["user_id"] != userId) {
+                  type = "receiver";
+                } else {
+                  type = "sender";
+                }
+                return (ChatMessage(lists[index]["content"], type));
+              },
+            );
+          } else {
+            return Container();
+          }
+        });
   }
 
   @override

@@ -13,10 +13,10 @@ Future<void> main() async {
   userName = prefs.getString("userName");
   userPropic = prefs.getString("userPropic");
   userBio = prefs.getString("userBio");
-  loggedIn = prefs.getBool("loggedIn");
-  if (loggedIn == null) {
-    loggedIn = false;
-  }
+  loggedIn = prefs.getBool("loggedIn") ?? false;
+  // if (loggedIn == null) {
+  //   loggedIn = false;
+  // }
 
   runApp(
     MaterialApp(
