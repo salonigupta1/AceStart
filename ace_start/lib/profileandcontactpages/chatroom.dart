@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:ace_start/backend/database.dart';
-import 'package:ace_start/backend/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+String myUserId = "";
 
 TextEditingController mycontroller = new TextEditingController();
 
@@ -60,11 +64,23 @@ class _ChatHomePageState extends State<ChatHomePage> {
   _ChatHomePageState(String friendsuserid) {
     fid = friendsuserid;
   }
+  ScrollController _controller = ScrollController();
 
   @override
   void initState() {
-    this._getNames();
+    this.fun();
     super.initState();
+  }
+
+  void fun() async {
+    final prefs = await SharedPreferences.getInstance();
+    myUserId = prefs.getString('userId');
+    QuerySnapshot snapshot = await messagedb.getRoom(myUserId, fid);
+    setState(() {
+      docId = snapshot.documents[0].documentID;
+    });
+
+    print(docId);
   }
 
   Widget _buildList() {
@@ -78,11 +94,14 @@ class _ChatHomePageState extends State<ChatHomePage> {
           List<dynamic> lists;
           if (snapshot.data != null) {
             lists = snapshot.data["messages"];
+
             return ListView.builder(
+              controller: _controller,
+              // reverse: true,
               itemCount: lists == null ? 0 : lists.length,
               itemBuilder: (BuildContext context, int index) {
                 String type;
-                if (lists[index]["user_id"] != userId) {
+                if (lists[index]["user_id"] != myUserId) {
                   type = "receiver";
                 } else {
                   type = "sender";
@@ -91,13 +110,21 @@ class _ChatHomePageState extends State<ChatHomePage> {
               },
             );
           } else {
-            return Container();
+            return Center(
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.blueAccent,
+              ),
+            );
           }
         });
   }
 
   @override
   Widget build(BuildContext context) {
+    Timer(
+      Duration(seconds: 1),
+      () => _controller.jumpTo(_controller.position.maxScrollExtent),
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text("Chat Screen"),
@@ -105,7 +132,10 @@ class _ChatHomePageState extends State<ChatHomePage> {
       ),
       body: Stack(
         children: <Widget>[
-          _buildList(),
+          Container(
+            margin: EdgeInsets.only(bottom: 60),
+            child: _buildList(),
+          ),
           Align(
             alignment: Alignment.bottomLeft,
             child: Container(
@@ -153,39 +183,23 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
   void _updateList() async {
     DocumentSnapshot x = await messagedb.getDocument(docId);
+    final prefs = await SharedPreferences.getInstance();
+
+    String userId = prefs.getString('userId');
+    print(x.data);
+    print(userId);
 
     List<dynamic> snap = x.data['messages'];
     snap.add({
       "user_id": userId,
       "content": mycontroller.text,
     });
-
-    await messagedb.updateMessage(snap, docId);
     setState(() {
       mycontroller.clear();
     });
-  }
 
-  void _getNames() async {
-    snapshot = await messagedb.getRoom(userId, fid);
-
-    List<ChatMessage> tempList = [];
-
-    var x = snapshot.documents[0].data["messages"];
-    docId = snapshot.documents[0].documentID;
-
-    for (int i = 0; i < x.length; i++) {
-      String type;
-      if (x[i]['user_id'] == userId) {
-        type = "sender";
-      } else {
-        type = "receiver";
-      }
-      tempList.add(new ChatMessage(x[i]['content'], type));
-    }
-
-    setState(() {
-      messages = tempList;
-    });
+    await messagedb.updateMessage(snap, docId);
+    Timer(Duration(milliseconds: 300),
+        () => _controller.jumpTo(_controller.position.maxScrollExtent));
   }
 }

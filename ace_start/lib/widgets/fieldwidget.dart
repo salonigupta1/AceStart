@@ -7,16 +7,6 @@ Widget appBarMain(BuildContext context) {
   );
 }
 
-InputDecoration TextFieldInputDecoration(String hint) {
-  return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(color: Colors.white54),
-      focusedBorder:
-          UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-      enabledBorder:
-          UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)));
-}
-
 TextStyle simpleTextFieldStyle() {
   return TextStyle(
     color: Colors.white,

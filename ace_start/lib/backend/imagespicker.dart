@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-File _image;
 final picker = ImagePicker();
 
 Future _imgFromCamera() async {

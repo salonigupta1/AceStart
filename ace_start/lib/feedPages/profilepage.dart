@@ -1,45 +1,40 @@
 import 'package:ace_start/backend/database.dart';
-import 'package:ace_start/backend/user.dart';
 import 'package:ace_start/feedPages/setting.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 DatabaseMethods databaseMethods = new DatabaseMethods();
 QuerySnapshot userSnapshot;
-String name = userName,
-    email = userEmail,
-    profilepic = userPropic,
-    bio = userBio;
+String name = "", email = "", profilepic = "", bio = "";
 bool connected = false;
 bool mypro = false;
 
 // ignore: must_be_immutable
 class ProfilePage extends StatefulWidget {
-  final String uid;
-  ProfilePage({Key key, @required this.uid}) : super(key: key);
+  final String uid, userId;
+  ProfilePage({Key key, @required this.uid, @required this.userId})
+      : super(key: key);
 
   @override
-  _ProfilePageState createState() => _ProfilePageState(uid);
+  _ProfilePageState createState() => _ProfilePageState(uid, userId);
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String usid;
-  _ProfilePageState(String uid) {
+  String usid, userId;
+  _ProfilePageState(String uid, String userId) {
     usid = uid;
+    this.userId = userId;
   }
 
   @override
   void initState() {
     if (userId != usid) {
-      print(userId);
-      print(usid);
       mypro = false;
       this._fetchuserInfo(usid);
       this.findconnection(userId, usid);
     } else {
-      print(userId);
-      print(usid);
       mypro = true;
+      this._fetchuserInfo(userId);
     }
 
     super.initState();
@@ -47,9 +42,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void findconnection(String u1, String u2) async {
     QuerySnapshot snap = await databaseMethods.getRoom(u1, u2);
+    print(snap);
 
     setState(() {
-      if (snap.documents.length == 0) {
+      if (snap == null || snap.documents.length == 0) {
         connected = false;
       } else {
         connected = true;
@@ -62,7 +58,6 @@ class _ProfilePageState extends State<ProfilePage> {
     String docId = snapshotss.documents[0].documentID;
     DocumentSnapshot docSnap =
         await databaseMethods.getDocumentGlobal("user_information", docId);
-    print(docId);
 
     List<dynamic> snap = docSnap.data['friends'];
     snap.add(
@@ -76,7 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     snapshotss = await databaseMethods.getUserByUserId(usid);
     docId = snapshotss.documents[0].documentID;
-    print(docId);
+
     docSnap =
         await databaseMethods.getDocumentGlobal("user_information", docId);
 
@@ -89,6 +84,10 @@ class _ProfilePageState extends State<ProfilePage> {
       docId,
       snap,
     );
+
+    setState(() {
+      connected = true;
+    });
   }
 
   void makenewroom(String u1, String u2) async {
@@ -97,12 +96,14 @@ class _ProfilePageState extends State<ProfilePage> {
         u1: true,
         u2: true,
       },
-      "messages": []
+      "messages": [],
     };
 
     await databaseMethods.newRoom(userMap);
     _updateList();
-    findconnection(u1, u2);
+    setState(() {
+      connected = true;
+    });
   }
 
   void _fetchuserInfo(String usid) async {
@@ -127,7 +128,7 @@ class _ProfilePageState extends State<ProfilePage> {
         appBar: AppBar(
           title: Center(
             child: Text(
-              mypro ? userName : name,
+              name,
               style: TextStyle(fontSize: 18.0),
             ),
           ),
@@ -140,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 onPressed: () {
                   // do something
-                  print("Tapped");
+
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => SettingPage()));
                 },
@@ -155,16 +156,12 @@ class _ProfilePageState extends State<ProfilePage> {
               children: <Widget>[
                 CircleAvatar(
                   radius: 80,
-                  backgroundImage: mypro
-                      ? NetworkImage(userPropic == null
-                          ? "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png"
-                          : userPropic)
-                      : NetworkImage(profilepic == null
-                          ? "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png"
-                          : profilepic),
+                  backgroundImage: profilepic == ""
+                      ? AssetImage("assets/images/img.png")
+                      : NetworkImage(profilepic),
                 ),
                 Text(
-                  mypro ? userName : name,
+                  name,
                   style: TextStyle(
                     fontFamily: 'SourceSansPro',
                     fontSize: 25,
@@ -182,8 +179,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   height: 50,
                   child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
-                      child: Text(mypro ? userBio : bio,
-                          style: TextStyle(color: Colors.black26))),
+                      child:
+                          Text(bio, style: TextStyle(color: Colors.black26))),
                 ),
                 Card(
                     color: Colors.white,
@@ -195,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: Colors.teal[900],
                       ),
                       title: Text(
-                        mypro ? userEmail : email,
+                        email,
                         style:
                             TextStyle(fontFamily: 'BalooBhai', fontSize: 20.0),
                       ),
@@ -211,9 +208,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     title: GestureDetector(
                       onTap: () {
-                        print("tapped");
-                        print(connected);
-                        print(mypro);
                         if (!connected && !mypro) {
                           makenewroom(usid, userId);
                         }

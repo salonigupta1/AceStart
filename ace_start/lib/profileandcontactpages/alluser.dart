@@ -1,22 +1,22 @@
-import 'package:ace_start/profileandcontactpages/chatroom.dart';
+import 'package:ace_start/backend/database.dart';
+import 'package:ace_start/backend/user.dart';
+import 'package:ace_start/feedPages/profilepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:ace_start/backend/database.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-DatabaseMethods databaseMethods = new DatabaseMethods();
-QuerySnapshot friendsSnapshot;
-QuerySnapshot nameSnapshot;
+DatabaseMethods databaseMethods = DatabaseMethods();
 
-class Chathome extends StatefulWidget {
+class AllUser extends StatefulWidget {
+  AllUser({Key key}) : super(key: key);
+
   @override
-  ChathomeState createState() => ChathomeState();
+  _AllUserState createState() => _AllUserState();
 }
 
-class ChathomeState extends State<Chathome> {
+class _AllUserState extends State<AllUser> {
   @override
   void initState() {
-    this._getNames();
+    this.getNames();
     super.initState();
   }
 
@@ -26,9 +26,9 @@ class ChathomeState extends State<Chathome> {
   List<DynamicWidget> names = [];
   List<DynamicWidget> filteredNames = [];
   Icon _searchIcon = new Icon(Icons.search);
-  Widget _appBarTitle = new Text('Connections');
+  Widget _appBarTitle = new Text('Global Users');
 
-  ChathomeState() {
+  _AllUserState() {
     _filter.addListener(() {
       if (_filter.text.isEmpty) {
         setState(() {
@@ -73,11 +73,11 @@ class ChathomeState extends State<Chathome> {
       List<DynamicWidget> tempList = [];
       for (int i = 0; i < filteredNames.length; i++) {
         if (filteredNames[i]
-            .n
+            .name
             .toLowerCase()
             .contains(_searchText.toLowerCase())) {
-          tempList.add(new DynamicWidget(
-              filteredNames[i].n, filteredNames[i].id, filteredNames[i].image));
+          tempList.add(new DynamicWidget(filteredNames[i].name,
+              filteredNames[i].id, filteredNames[i].photo));
         }
       }
       filteredNames = tempList;
@@ -85,8 +85,8 @@ class ChathomeState extends State<Chathome> {
     return ListView.builder(
       itemCount: names == null ? 0 : filteredNames.length,
       itemBuilder: (BuildContext context, int index) {
-        return DynamicWidget(filteredNames[index].n, filteredNames[index].id,
-            filteredNames[index].image);
+        return DynamicWidget(filteredNames[index].name, filteredNames[index].id,
+            filteredNames[index].photo);
       },
     );
   }
@@ -111,21 +111,19 @@ class ChathomeState extends State<Chathome> {
     });
   }
 
-  void _getNames() async {
-    final prefs = await SharedPreferences.getInstance();
-    String userId = prefs.getString('userId');
-    friendsSnapshot = await databaseMethods.getConnections(userId);
+  void getNames() async {
+    QuerySnapshot snapshot = await databaseMethods.getAllUsers(globalUserId);
     List<DynamicWidget> tempList = [];
-
-    var x = friendsSnapshot.documents[0].data["friends"];
-    for (int i = 0; i < x.length; i++) {
-      nameSnapshot = await databaseMethods.getUserByUserId(x[i]);
-      tempList.add(new DynamicWidget(
-          nameSnapshot.documents[0].data["user_name"],
-          x[i],
-          nameSnapshot.documents[0].data["profile_picture"]));
+    var x = snapshot.documents.length;
+    if (x == null) {
+      return;
     }
-
+    for (int i = 0; i < x; i++) {
+      tempList.add(DynamicWidget(
+          snapshot.documents[i].data["user_name"],
+          snapshot.documents[i].data["user_id"],
+          snapshot.documents[i].data["profile_picture"]));
+    }
     setState(() {
       names = tempList;
       names.shuffle();
@@ -136,11 +134,11 @@ class ChathomeState extends State<Chathome> {
 
 // ignore: must_be_immutable
 class DynamicWidget extends StatelessWidget {
-  String n, id, image;
-  DynamicWidget(String name, String id, String image) {
-    this.n = name;
+  String id, name, photo;
+  DynamicWidget(String name, String id, String photo) {
     this.id = id;
-    this.image = image;
+    this.name = name;
+    this.photo = photo;
   }
 
   @override
@@ -157,16 +155,19 @@ class DynamicWidget extends StatelessWidget {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => ChatHomePage(friendsuserid: id)));
+                  builder: (context) => ProfilePage(
+                        uid: id,
+                        userId: globalUserId,
+                      )));
         },
         child: new ListTile(
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(image == null
-                ? "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png"
-                : image),
+            backgroundImage: (photo == null || photo == "")
+                ? AssetImage("assets/images/img.png")
+                : NetworkImage(photo),
           ),
           title: Text(
-            n,
+            name,
             style: TextStyle(color: Colors.black),
           ),
         ),

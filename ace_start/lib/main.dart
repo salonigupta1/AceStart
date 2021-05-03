@@ -1,26 +1,19 @@
+import 'package:ace_start/backend/user.dart';
 import 'package:ace_start/feedPages/feedpages.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'InitialPages/homepage.dart';
-import 'backend/user.dart';
 
+var userId;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  userId = prefs.getString("userId");
-  userEmail = prefs.getString("userEmail");
-  userName = prefs.getString("userName");
-  userPropic = prefs.getString("userPropic");
-  userBio = prefs.getString("userBio");
-  loggedIn = prefs.getBool("loggedIn") ?? false;
-  // if (loggedIn == null) {
-  //   loggedIn = false;
-  // }
+  userId = prefs.getString('userId');
+  globalUserId = userId;
 
   runApp(
     MaterialApp(
-      home: !loggedIn ? MyApp() : FeedPage(),
+      home: (userId == null || userId == "") ? MyApp() : FeedPage(),
       theme: ThemeData(accentColor: Color(0xff007EF4)),
       debugShowCheckedModeBanner: false,
     ),
@@ -28,6 +21,11 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+  void fun() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -36,7 +34,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: !loggedIn ? MyHomePage() : FeedPage(),
+      home: (userId == null || userId == "") ? MyHomePage() : FeedPage(),
     );
   }
 }

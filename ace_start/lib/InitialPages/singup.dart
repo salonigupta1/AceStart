@@ -2,18 +2,23 @@ import 'dart:io';
 import 'package:ace_start/InitialPages/login.dart';
 import 'package:ace_start/backend/auth.dart';
 import 'package:ace_start/backend/database.dart';
-import 'package:ace_start/backend/user.dart';
+
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:ace_start/feedPages/feedpages.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
+import 'package:ace_start/backend/user.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
+User user = User();
+
+String userId = "";
 
 File _image;
 
-String path =
-    "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png";
+String path = "";
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -21,7 +26,17 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPage extends State<RegisterPage> {
-  double withG;
+  @override
+  void initState() {
+    this.fun();
+    super.initState();
+  }
+
+  void fun() async {
+    final prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+  }
+
   TextEditingController nameTextEditingController = new TextEditingController();
   TextEditingController emailTextEditingController =
       new TextEditingController();
@@ -34,13 +49,6 @@ class _RegisterPage extends State<RegisterPage> {
 
   DatabaseMethods databaseMethods = new DatabaseMethods();
   signMeUp(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    if (path == null) {
-      setState(() {
-        path =
-            "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png";
-      });
-    }
     if (formKey.currentState.validate()) {
       setState(() {
         isLoading = true;
@@ -53,30 +61,28 @@ class _RegisterPage extends State<RegisterPage> {
               nameTextEditingController.text)
           .then((val) async {
         if (val != null) {
+          var x = val;
           Map<String, dynamic> userMap = {
-            "user_id": userId,
+            "user_id": x.userId,
             "user_name": nameTextEditingController.text,
-            "email": userEmail,
-            "profile_picture": path,
+            "email": emailTextEditingController.text,
+            "profile_picture": path ?? "",
             "bio": bioTextEditingController.text,
             "friends": [],
           };
-          setState(() {
-            userPropic = path;
-            userBio = bioTextEditingController.text;
-            userName = nameTextEditingController.text;
-            prefs.setString("userId", userId);
-            prefs.setString("userEmail", userEmail);
-            prefs.setString("userPropic", path);
-            prefs.setString("userName", userName);
-            prefs.setString("userBio", userBio);
-            prefs.setBool("loggedIn", true);
-            loggedIn = true;
-          });
-          await databaseMethods.updateUserInfo(userMap);
 
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => FeedPage()));
+          await databaseMethods.updateUserInfo(userMap);
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString('userId', x.userId);
+          setState(() {
+            globalUserId = userId;
+          });
+
+          print("WORKING");
+          print(globalUserId);
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => FeedPage()),
+              (Route<dynamic> route) => false);
         }
       });
     }
@@ -84,10 +90,8 @@ class _RegisterPage extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    withG = MediaQuery.of(context).size.width;
-
     return Scaffold(
-      body: !loggedIn
+      body: (userId == null || userId == "")
           ? isLoading
               ? SingleChildScrollView(
                   child: Container(
@@ -389,7 +393,7 @@ class _RegisterPage extends State<RegisterPage> {
   Widget bottomSheet(BuildContext context) {
     return Container(
       height: 100.0,
-      width: withG,
+      width: MediaQuery.of(context).size.width,
       margin: EdgeInsets.symmetric(
         horizontal: 20,
         vertical: 20,
@@ -406,15 +410,19 @@ class _RegisterPage extends State<RegisterPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // ignore: deprecated_member_use
               FlatButton.icon(
                   icon: Icon(Icons.camera),
                   onPressed: () {
+                    Navigator.pop(context);
                     takePhoto(ImageSource.camera, context);
                   },
                   label: Text("Camera")),
+              // ignore: deprecated_member_use
               FlatButton.icon(
                   icon: Icon(Icons.image),
                   onPressed: () {
+                    Navigator.pop(context);
                     takePhoto(ImageSource.gallery, context);
                   },
                   label: Text("Gallery")),
@@ -426,6 +434,7 @@ class _RegisterPage extends State<RegisterPage> {
   }
 
   upload(BuildContext context) async {
+    isLoading = true;
     String filename = basename(_image.path);
     StorageReference firebaseStorageRef =
         FirebaseStorage.instance.ref().child(filename);
@@ -433,13 +442,19 @@ class _RegisterPage extends State<RegisterPage> {
 
     StorageTaskSnapshot taskSnapshots = await uploadTask.onComplete;
     var p = await taskSnapshots.ref.getDownloadURL();
+
     setState(() {
       path = p;
     });
+    isLoading = false;
   }
 
   takePhoto(ImageSource source, BuildContext context) async {
+    // ignore: deprecated_member_use
     var im = await ImagePicker.pickImage(source: source);
+    if (im == null) {
+      return;
+    }
     setState(() {
       _image = im;
       upload(context);
@@ -451,9 +466,10 @@ class _RegisterPage extends State<RegisterPage> {
       children: <Widget>[
         CircleAvatar(
           radius: 80,
-          backgroundImage: NetworkImage(path == null
-              ? "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png"
-              : path),
+          backgroundColor: Colors.white,
+          backgroundImage: (path == null || path == "")
+              ? AssetImage("assets/images/img.png")
+              : NetworkImage(path),
         ),
         Positioned(
           bottom: 20.0,
@@ -473,60 +489,4 @@ class _RegisterPage extends State<RegisterPage> {
       ],
     );
   }
-}
-
-class TopWaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    // This is where we decide what part of our image is going to be visible.
-    var path = Path();
-    path.lineTo(0.0, size.height);
-
-    var firstControlPoint = new Offset(size.width / 7, size.height - 30);
-    var firstEndPoint = new Offset(size.width / 6, size.height / 1.5);
-
-    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
-        firstEndPoint.dx, firstEndPoint.dy);
-
-    var secondControlPoint = Offset(size.width / 5, size.height / 4);
-    var secondEndPoint = Offset(size.width / 1.5, size.height / 5);
-    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy,
-        secondEndPoint.dx, secondEndPoint.dy);
-
-    var thirdControlPoint =
-        Offset(size.width - (size.width / 9), size.height / 6);
-    var thirdEndPoint = Offset(size.width, 0.0);
-    path.quadraticBezierTo(thirdControlPoint.dx, thirdControlPoint.dy,
-        thirdEndPoint.dx, thirdEndPoint.dy);
-
-    ///move from bottom right to top
-    path.lineTo(size.width, 0.0);
-
-    ///finally close the path by reaching start point from top right corner
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
-class FooterWaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-    path.moveTo(size.width, 0.0);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0.0, size.height);
-    path.lineTo(0.0, size.height - 60);
-    var secondControlPoint = Offset(size.width - (size.width / 6), size.height);
-    var secondEndPoint = Offset(size.width, 0.0);
-    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy,
-        secondEndPoint.dx, secondEndPoint.dy);
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

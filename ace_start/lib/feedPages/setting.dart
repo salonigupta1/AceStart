@@ -1,17 +1,18 @@
 import 'dart:io';
 
 import 'package:ace_start/backend/database.dart';
-import 'package:ace_start/backend/user.dart';
-import 'package:ace_start/feedPages/profilepage.dart';
-import 'package:ace_start/widgets/fieldwidget.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:ace_start/backend/shared_pref.dart';
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 QuerySnapshot querySnapshot;
 DocumentChange documentSnaphot;
+MyLocalStorage _storage = MyLocalStorage();
 TextEditingController biocontroller = new TextEditingController();
 
 DatabaseMethods databaseMethods = new DatabaseMethods();
@@ -19,6 +20,8 @@ DatabaseMethods databaseMethods = new DatabaseMethods();
 File _image;
 
 String path =
+    "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png";
+String nullPath =
     "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png";
 
 class SettingPage extends StatefulWidget {
@@ -32,27 +35,26 @@ class _SettingPageState extends State<SettingPage> {
   void update(BuildContext context) async {
     if (path == null) {
       setState(() {
-        path = userPropic;
+        path = nullPath;
       });
     }
+
+    final prefs = await SharedPreferences.getInstance();
+    String userId = prefs.getString('userId');
 
     querySnapshot = await databaseMethods.getUserByUserId(userId);
     String docId;
 
-    userBio = biocontroller.text;
+    String userBio = biocontroller.text;
     docId = querySnapshot.documents[0].documentID;
-    print(userBio);
-    print(docId);
 
     await databaseMethods.updateBio(userBio, docId);
+    String userPropic;
     setState(() {
       userPropic = path;
     });
-
     await databaseMethods.updateProfilePicture(userPropic, docId);
-
     querySnapshot = await databaseMethods.getPosts();
-
     Navigator.pop(context);
   }
 
@@ -165,12 +167,14 @@ class _SettingPageState extends State<SettingPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // ignore: deprecated_member_use
               FlatButton.icon(
                   icon: Icon(Icons.camera),
                   onPressed: () {
                     takePhoto(ImageSource.camera, context);
                   },
                   label: Text("Camera")),
+              // ignore: deprecated_member_use
               FlatButton.icon(
                   icon: Icon(Icons.image),
                   onPressed: () {
@@ -198,6 +202,7 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   takePhoto(ImageSource source, BuildContext context) async {
+    // ignore: deprecated_member_use
     var im = await ImagePicker.pickImage(source: source);
     setState(() {
       _image = im;

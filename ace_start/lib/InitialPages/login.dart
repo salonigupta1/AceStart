@@ -1,15 +1,18 @@
 import 'package:ace_start/InitialPages/singup.dart';
 import 'package:ace_start/feedPages/feedpages.dart';
-import 'package:ace_start/feedPages/newpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ace_start/backend/auth.dart';
-import 'package:ace_start/backend/user.dart';
 import 'package:ace_start/backend/database.dart';
-import 'package:toast/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toast/toast.dart';
+import 'package:ace_start/backend/user.dart';
+
+User user = User();
+String userId;
 
 QuerySnapshot userSnapshot;
+bool loggedIn = false;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -17,6 +20,17 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPage extends State<LoginPage> {
+  @override
+  void initState() {
+    this.fun();
+    super.initState();
+  }
+
+  void fun() async {
+    final prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId') ?? "";
+  }
+
   DatabaseMethods databaseMethods = new DatabaseMethods();
   bool isLoading = false;
   AuthMethods authMethods = new AuthMethods();
@@ -38,42 +52,41 @@ class _LoginPage extends State<LoginPage> {
   }
 
   signMeIN() async {
-    final prefs = await SharedPreferences.getInstance();
     if (formKey.currentState.validate()) {
       setState(() {
         isLoading = true;
       });
 
-      authMethods
+      await authMethods
           .signInWithEmailAndPassword(emailTextEditingController.text,
               passwordTextEditingController.text)
-          .then((val) async {
-        if (val == null) {
+          .then((value) async {
+        var user = value;
+
+        if (user == null || user.userId == null || user.userId == "") {
           Toast.show("Wrong email or password", context,
               duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+          setState(() {
+            isLoading = false;
+          });
+
           return;
         }
-        userId = val.userId;
 
+        userId = user.userId;
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('userId', userId);
         userSnapshot = await databaseMethods.getUserByUserId(userId);
-
         setState(() {
-          userId = userSnapshot.documents[0].data["user_id"];
-          userName = userSnapshot.documents[0].data["user_name"];
-          userEmail = userSnapshot.documents[0].data["email"];
-          userPropic = userSnapshot.documents[0].data["profile_picture"];
-          userBio = userSnapshot.documents[0].data["bio"];
-          prefs.setString("userId", userId);
-          prefs.setString("userEmail", userEmail);
-          prefs.setString("userPropic", userPropic);
-          prefs.setString("userName", userName);
-          prefs.setString("userBio", userBio);
-          prefs.setBool("loggedIn", true);
+          globalUserId = userId;
         });
 
-        // print(userPropic);
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => FeedPage()));
+        if (userId != null && userId != "") {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => FeedPage()),
+              (Route<dynamic> route) => false);
+        }
       });
     }
   }
@@ -81,236 +94,259 @@ class _LoginPage extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: !loggedIn
-            ? SingleChildScrollView(
-                child: Container(
-                    height: MediaQuery.of(context).size.height,
-                    color: Colors.white,
-                    child: Column(
-                      // crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Stack(
-                          alignment: Alignment.bottomCenter,
+        body: (userId == null || userId == "")
+            ? isLoading
+                ? SingleChildScrollView(
+                    child: Container(
+                      height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.white,
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  )
+                : SingleChildScrollView(
+                    child: Container(
+                        height: MediaQuery.of(context).size.height,
+                        color: Colors.white,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
-                            ClipPath(
-                              clipper: TopWaveClipper(),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                      colors: <Color>[
-                                        Color(0xff094C72),
-                                        Colors.white,
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.center),
-                                ),
-                                height:
-                                    MediaQuery.of(context).size.height / 2.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            height: MediaQuery.of(context).size.height * 0.5,
-                            width: MediaQuery.of(context).size.width * 0.8,
-                            child: Stack(
+                            Stack(
                               alignment: Alignment.bottomCenter,
                               children: <Widget>[
                                 ClipPath(
-                                  clipper: FooterWaveClipper(),
+                                  clipper: TopWaveClipper(),
                                   child: Container(
-                                    decoration:
-                                        BoxDecoration(color: Colors.white),
-                                    height:
-                                        MediaQuery.of(context).size.height / 3,
-                                  ),
-                                ),
-                                Form(
-                                  key: formKey,
-                                  child: Column(
-//                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                    children: <Widget>[
-                                      SizedBox(
-                                        height: 15,
-                                      ),
-                                      SizedBox(
-                                        height: 30,
-                                      ),
-                                      Padding(
-                                          padding: EdgeInsets.only(bottom: 10),
-                                          child: Container(
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.09,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                30,
-                                            child: Material(
-                                              elevation: 10,
-                                              color: Color(0xff7399AF),
-                                              shape: RoundedRectangleBorder(),
-                                              child: Padding(
-                                                padding: EdgeInsets.only(
-                                                    left: 20,
-                                                    right: 20,
-                                                    top: 10,
-                                                    bottom: 10),
-                                                child: TextFormField(
-                                                  controller:
-                                                      emailTextEditingController,
-                                                  keyboardType: TextInputType
-                                                      .emailAddress,
-                                                  validator: (val) {
-                                                    return RegExp(
-                                                                r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
-                                                            .hasMatch(val)
-                                                        ? null
-                                                        : null;
-                                                  },
-                                                  decoration: InputDecoration(
-                                                    border: InputBorder.none,
-                                                    hintText: "Email",
-                                                    labelStyle: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 14),
-                                                    // hintText: "Email",
-                                                    // hintStyle: TextStyle(color: Color(0xFFE1E1E1), fontSize: 14)
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          )),
-                                      Padding(
-                                          padding: EdgeInsets.only(bottom: 5),
-                                          child: Container(
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.08,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                30,
-                                            child: Material(
-                                              elevation: 10,
-                                              color: Color(0xff7399AF),
-                                              shape: RoundedRectangleBorder(),
-                                              child: Padding(
-                                                padding: EdgeInsets.only(
-                                                    left: 20,
-                                                    right: 20,
-                                                    top: 10,
-                                                    bottom: 10),
-                                                child: TextFormField(
-                                                  controller:
-                                                      passwordTextEditingController,
-                                                  obscureText: true,
-                                                  keyboardType: TextInputType
-                                                      .emailAddress,
-                                                  validator: (val) {
-                                                    return val.length > 6
-                                                        ? null
-                                                        : null;
-                                                  },
-                                                  decoration: InputDecoration(
-                                                    border: InputBorder.none,
-                                                    hintText: "Password",
-                                                    labelStyle: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 14),
-                                                    // hintText: "Email",
-                                                    // hintStyle: TextStyle(color: Color(0xFFE1E1E1), fontSize: 14)
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          )),
-                                      SizedBox(
-                                        height: 40,
-                                      ),
-                                      Align(
-                                          alignment: Alignment.center,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              resetPass(
-                                                  emailTextEditingController
-                                                      .text);
-                                            },
-                                            child: Text(
-                                              'Forget your password?',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          )),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Container(
-                                        width: 150,
-                                        child: MaterialButton(
-                                          color: Color(0xff7399AF),
-                                          splashColor: Colors.blue,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                new BorderRadius.circular(5.0),
-                                          ),
-                                          onPressed: () {
-                                            signMeIN();
-                                          },
-                                          child: Text(
-                                            "Login",
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                    ],
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                          colors: <Color>[
+                                            Color(0xff094C72),
+                                            Colors.white,
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.center),
+                                    ),
+                                    height: MediaQuery.of(context).size.height /
+                                        2.5,
                                   ),
                                 ),
                               ],
-                            )),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => RegisterPage()));
-                          },
-                          child: RichText(
-                            text: TextSpan(
-                                text: 'Do not have account? ',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold),
-                                children: <TextSpan>[
-                                  new TextSpan(
-                                      text: 'Register Now',
-                                      style: new TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          decoration: TextDecoration.underline,
-                                          color: Colors.black)),
-                                ]),
-                          ),
-                        )
-                      ],
-                    )),
-              )
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                height:
+                                    MediaQuery.of(context).size.height * 0.5,
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                child: Stack(
+                                  alignment: Alignment.bottomCenter,
+                                  children: <Widget>[
+                                    ClipPath(
+                                      clipper: FooterWaveClipper(),
+                                      child: Container(
+                                        decoration:
+                                            BoxDecoration(color: Colors.white),
+                                        height:
+                                            MediaQuery.of(context).size.height /
+                                                3,
+                                      ),
+                                    ),
+                                    Form(
+                                      key: formKey,
+                                      child: Column(
+//                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                        children: <Widget>[
+                                          SizedBox(
+                                            height: 15,
+                                          ),
+                                          SizedBox(
+                                            height: 30,
+                                          ),
+                                          Padding(
+                                              padding:
+                                                  EdgeInsets.only(bottom: 10),
+                                              child: Container(
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.09,
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width -
+                                                    30,
+                                                child: Material(
+                                                  elevation: 10,
+                                                  color: Color(0xff7399AF),
+                                                  shape:
+                                                      RoundedRectangleBorder(),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 20,
+                                                        right: 20,
+                                                        top: 10,
+                                                        bottom: 10),
+                                                    child: TextFormField(
+                                                      controller:
+                                                          emailTextEditingController,
+                                                      keyboardType:
+                                                          TextInputType
+                                                              .emailAddress,
+                                                      validator: (val) {
+                                                        return RegExp(
+                                                                    r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
+                                                                .hasMatch(val)
+                                                            ? null
+                                                            : null;
+                                                      },
+                                                      decoration:
+                                                          InputDecoration(
+                                                        border:
+                                                            InputBorder.none,
+                                                        hintText: "Email",
+                                                        labelStyle: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 14),
+                                                        // hintText: "Email",
+                                                        // hintStyle: TextStyle(color: Color(0xFFE1E1E1), fontSize: 14)
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              )),
+                                          Padding(
+                                              padding:
+                                                  EdgeInsets.only(bottom: 5),
+                                              child: Container(
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.08,
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width -
+                                                    30,
+                                                child: Material(
+                                                  elevation: 10,
+                                                  color: Color(0xff7399AF),
+                                                  shape:
+                                                      RoundedRectangleBorder(),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 20,
+                                                        right: 20,
+                                                        top: 10,
+                                                        bottom: 10),
+                                                    child: TextFormField(
+                                                      controller:
+                                                          passwordTextEditingController,
+                                                      obscureText: true,
+                                                      keyboardType:
+                                                          TextInputType
+                                                              .emailAddress,
+                                                      validator: (val) {
+                                                        return val.length > 6
+                                                            ? null
+                                                            : null;
+                                                      },
+                                                      decoration:
+                                                          InputDecoration(
+                                                        border:
+                                                            InputBorder.none,
+                                                        hintText: "Password",
+                                                        labelStyle: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 14),
+                                                        // hintText: "Email",
+                                                        // hintStyle: TextStyle(color: Color(0xFFE1E1E1), fontSize: 14)
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              )),
+                                          SizedBox(
+                                            height: 40,
+                                          ),
+                                          Align(
+                                              alignment: Alignment.center,
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  resetPass(
+                                                      emailTextEditingController
+                                                          .text);
+                                                },
+                                                child: Text(
+                                                  'Forget your password?',
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              )),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          Container(
+                                            width: 150,
+                                            child: MaterialButton(
+                                              color: Color(0xff7399AF),
+                                              splashColor: Colors.blue,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    new BorderRadius.circular(
+                                                        5.0),
+                                              ),
+                                              onPressed: () {
+                                                signMeIN();
+                                              },
+                                              child: Text(
+                                                "Login",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 5,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => RegisterPage()));
+                              },
+                              child: RichText(
+                                text: TextSpan(
+                                    text: 'Do not have account? ',
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold),
+                                    children: <TextSpan>[
+                                      new TextSpan(
+                                          text: 'Register Now',
+                                          style: new TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                              color: Colors.black)),
+                                    ]),
+                              ),
+                            )
+                          ],
+                        )),
+                  )
             : FeedPage());
   }
 }

@@ -1,4 +1,3 @@
-import 'package:ace_start/backend/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DatabaseMethods {
@@ -100,6 +99,10 @@ class DatabaseMethods {
   }
 
   createRoom(usersMap) async {
-    return await Firestore.instance.collection("chat_room").add(usersMap);
+    return Firestore.instance.collection("chat_room").add(usersMap);
+  }
+
+  getAllUsers(userId) async {
+    return Firestore.instance.collection("user_information").getDocuments();
   }
 }
