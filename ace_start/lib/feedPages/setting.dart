@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ace_start/backend/database.dart';
+import 'package:ace_start/backend/user.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -19,10 +20,7 @@ DatabaseMethods databaseMethods = new DatabaseMethods();
 
 File _image;
 
-String path =
-    "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png";
-String nullPath =
-    "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png";
+String path = "", bio = "";
 
 class SettingPage extends StatefulWidget {
   SettingPage({Key key}) : super(key: key);
@@ -32,13 +30,20 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
-  void update(BuildContext context) async {
-    if (path == null) {
-      setState(() {
-        path = nullPath;
-      });
-    }
+  @override
+  void initState() {
+    this.fetchInfo();
+    super.initState();
+  }
 
+  void fetchInfo() async {
+    QuerySnapshot snapshot =
+        await databaseMethods.getUserByUserId(globalUserId);
+    path = snapshot.documents[0].data["profile_picture"];
+    bio = snapshot.documents[0].data["bio"];
+  }
+
+  void update(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     String userId = prefs.getString('userId');
 
@@ -49,12 +54,11 @@ class _SettingPageState extends State<SettingPage> {
     docId = querySnapshot.documents[0].documentID;
 
     await databaseMethods.updateBio(userBio, docId);
-    String userPropic;
-    setState(() {
-      userPropic = path;
-    });
-    await databaseMethods.updateProfilePicture(userPropic, docId);
-    querySnapshot = await databaseMethods.getPosts();
+    if (path != "" && path != null) {
+      await databaseMethods.updateProfilePicture(path, docId);
+      querySnapshot = await databaseMethods.getPosts();
+    }
+
     Navigator.pop(context);
   }
 
@@ -215,9 +219,9 @@ class _SettingPageState extends State<SettingPage> {
       children: <Widget>[
         CircleAvatar(
           radius: 80,
-          backgroundImage: NetworkImage(path == null
-              ? "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png"
-              : path),
+          backgroundImage: (path == null || path == "")
+              ? AssetImage("assets/images/img.png")
+              : NetworkImage(path),
         ),
         Positioned(
           bottom: 20.0,

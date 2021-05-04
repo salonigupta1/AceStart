@@ -22,7 +22,7 @@ TextEditingController contentcontroller = new TextEditingController();
 TextEditingController headingcontroller = new TextEditingController();
 
 MyLocalStorage _storage = MyLocalStorage();
-bool loggedOut = false;
+bool loggedOut = true;
 
 List<DynamicWidget> listDynamic = [];
 
@@ -38,7 +38,10 @@ AuthMethods authMethods = new AuthMethods();
 class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
   @override
   void initState() {
-    this.fetchInfo();
+    setState(() {
+      this.fetchInfo();
+      loggedOut = false;
+    });
     super.initState();
   }
 
@@ -49,12 +52,11 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
   }
 
   void logout(context) async {
-    authMethods.signout();
-    Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (BuildContext context) => MyApp()),
-        (Route<dynamic> route) => false);
-    // Navigator.popUntil(context, ModalRoute.withName('/MyHomePage'));
+    var x = await authMethods.signout();
+    print(x);
+    await Navigator.pushAndRemoveUntil(context,
+        MaterialPageRoute(builder: (builder) => MyApp()), (route) => false);
+    // Navigator.push(context, MaterialPageRoute(builder: (context) => MyApp()));
   }
 
   @override
@@ -213,33 +215,36 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
               ],
             ),
             backgroundColor: Color(0xFFEEEEEE),
-            body: Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              child: Column(
-                children: [
-                  Container(
-                    margin: EdgeInsets.all(5),
-                    padding: EdgeInsets.only(
-                        left: 15, right: 15, top: 15, bottom: 15),
-                    height: 80,
-                    width: MediaQuery.of(context).size.width - 50,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                        border: Border.all(
-                          color: Colors.black,
-                        )),
-                    child: writePost(userPropic, context),
-                  ),
-                  SingleChildScrollView(
-                    child: Container(
-                        height: 500,
-                        width: MediaQuery.of(context).size.width - 30,
-                        child: askList()),
-                  ),
-                  //ADD_MORE_WIDGETS
-                ],
+            body: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.all(5),
+                      padding: EdgeInsets.only(
+                          left: 15, right: 15, top: 15, bottom: 15),
+                      height: 80,
+                      width: MediaQuery.of(context).size.width - 50,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Colors.black,
+                          )),
+                      child: writePost(userPropic, context),
+                    ),
+                    SingleChildScrollView(
+                      child: Container(
+                          height: 500,
+                          width: MediaQuery.of(context).size.width - 30,
+                          child: askList()),
+                    ),
+                    //ADD_MORE_WIDGETS
+                  ],
+                ),
               ),
             ),
           );
@@ -254,7 +259,6 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
       userEmail = snap.documents[0].data["email"];
       userPropic = snap.documents[0].data["profile_picture"];
       userBio = snap.documents[0].data["bio"];
-      loggedOut = false;
     });
   }
 
@@ -262,7 +266,6 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
     postsnapshot = await databaseMethods.getPosts();
 
     listDynamic = [];
-    loggedOut = false;
 
     var x = postsnapshot.documents;
     for (int i = 0; i < x.length; i++) {
@@ -319,6 +322,9 @@ addPost(String content, String heading) async {
     "bio": bio,
     "content": heading + "\n" + content,
   };
+
+  contentcontroller.clear();
+  headingcontroller.clear();
 
   await databaseMethods.updatePosts(userMap);
 }

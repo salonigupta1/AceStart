@@ -1,3 +1,5 @@
+import 'package:ace_start/InitialPages/login.dart';
+import 'package:ace_start/feedPages/feedpages.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user.dart';
@@ -58,6 +60,9 @@ class AuthMethods {
   Future signout() async {
     try {
       await _storage.clearPrefs();
+      userBio = "";
+      userName = "";
+      userPropic = "";
       return await _auth.signOut();
     } catch (e) {
       print(e.toString());

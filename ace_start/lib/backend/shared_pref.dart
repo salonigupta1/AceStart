@@ -15,5 +15,6 @@ class MyLocalStorage {
   clearPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove("userId");
+    prefs.clear();
   }
 }

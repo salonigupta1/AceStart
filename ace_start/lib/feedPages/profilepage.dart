@@ -84,10 +84,6 @@ class _ProfilePageState extends State<ProfilePage> {
       docId,
       snap,
     );
-
-    setState(() {
-      connected = true;
-    });
   }
 
   void makenewroom(String u1, String u2) async {
@@ -176,11 +172,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width - 50,
-                  height: 50,
-                  child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child:
-                          Text(bio, style: TextStyle(color: Colors.black26))),
+                  height: 30,
+                  child: Center(
+                    child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child:
+                            Text(bio, style: TextStyle(color: Colors.black38))),
+                  ),
                 ),
                 Card(
                     color: Colors.white,
@@ -188,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
                     child: ListTile(
                       leading: Icon(
-                        Icons.phone,
+                        Icons.mail,
                         color: Colors.teal[900],
                       ),
                       title: Text(
@@ -203,7 +201,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
                   child: ListTile(
                     leading: Icon(
-                      Icons.cake,
+                      Icons.person,
                       color: Colors.teal[900],
                     ),
                     title: GestureDetector(

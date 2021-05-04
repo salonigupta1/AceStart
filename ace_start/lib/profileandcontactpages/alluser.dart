@@ -119,10 +119,12 @@ class _AllUserState extends State<AllUser> {
       return;
     }
     for (int i = 0; i < x; i++) {
-      tempList.add(DynamicWidget(
-          snapshot.documents[i].data["user_name"],
-          snapshot.documents[i].data["user_id"],
-          snapshot.documents[i].data["profile_picture"]));
+      if (snapshot.documents[i].data["user_id"] != globalUserId) {
+        tempList.add(DynamicWidget(
+            snapshot.documents[i].data["user_name"],
+            snapshot.documents[i].data["user_id"],
+            snapshot.documents[i].data["profile_picture"]));
+      }
     }
     setState(() {
       names = tempList;

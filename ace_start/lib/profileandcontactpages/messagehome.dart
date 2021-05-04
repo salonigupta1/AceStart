@@ -128,7 +128,6 @@ class ChathomeState extends State<Chathome> {
 
     setState(() {
       names = tempList;
-      names.shuffle();
       filteredNames = names;
     });
   }
@@ -161,9 +160,9 @@ class DynamicWidget extends StatelessWidget {
         },
         child: new ListTile(
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(image == null
-                ? "https://www.pngkey.com/png/detail/21-213224_unknown-person-icon-png-download.png"
-                : image),
+            backgroundImage: (image == null || image == "")
+                ? AssetImage("assets/images/img.png")
+                : NetworkImage(image),
           ),
           title: Text(
             n,

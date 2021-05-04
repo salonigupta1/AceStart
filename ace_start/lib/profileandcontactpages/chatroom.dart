@@ -56,7 +56,7 @@ class ChatMessage extends StatelessWidget {
   }
 }
 
-List<ChatMessage> messages = [];
+List<dynamic> lists = [];
 
 String fid;
 
@@ -69,6 +69,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
   @override
   void initState() {
     this.fun();
+    lists = [];
     super.initState();
   }
 
@@ -91,7 +92,6 @@ class _ChatHomePageState extends State<ChatHomePage> {
             .snapshots(),
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          List<dynamic> lists;
           if (snapshot.data != null) {
             lists = snapshot.data["messages"];
 

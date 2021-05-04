@@ -29,6 +29,9 @@ class _LoginPage extends State<LoginPage> {
   void fun() async {
     final prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId') ?? "";
+    setState(() {
+      isLoading = false;
+    });
   }
 
   DatabaseMethods databaseMethods = new DatabaseMethods();
@@ -80,12 +83,14 @@ class _LoginPage extends State<LoginPage> {
         userSnapshot = await databaseMethods.getUserByUserId(userId);
         setState(() {
           globalUserId = userId;
+          isLoading = false;
         });
 
         if (userId != null && userId != "") {
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => FeedPage()),
               (Route<dynamic> route) => false);
+          isLoading = false;
         }
       });
     }
