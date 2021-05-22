@@ -67,9 +67,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       Column(
                         children: <Widget>[
                           Container(
+                              margin: EdgeInsets.only(bottom: 10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(2),
+                                gradient: LinearGradient(colors: <Color>[
+                                  Colors.black,
+                                  Color(0xff7399AF),
+                                ]),
+                              ),
                               width: MediaQuery.of(context).size.width - 50,
                               child: MaterialButton(
-                                color: Colors.black26,
                                 splashColor: Colors.blue,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: new BorderRadius.circular(5.0),
@@ -86,9 +93,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                               )),
                           Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(2),
+                                gradient: LinearGradient(colors: <Color>[
+                                  Colors.black,
+                                  Color(0xff7399AF),
+                                ]),
+                              ),
                               width: MediaQuery.of(context).size.width - 50,
                               child: MaterialButton(
-                                color: Colors.black26,
                                 splashColor: Colors.blue,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: new BorderRadius.circular(5.0),

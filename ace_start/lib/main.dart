@@ -10,6 +10,8 @@ Future<void> main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   userId = prefs.getString('userId');
   globalUserId = userId;
+  globalUserName = prefs.getString('userName');
+  globalPropic = prefs.getString('userPropic');
 
   runApp(
     MaterialApp(

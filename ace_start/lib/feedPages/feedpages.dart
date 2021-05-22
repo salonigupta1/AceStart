@@ -52,11 +52,9 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
   }
 
   void logout(context) async {
-    var x = await authMethods.signout();
-    print(x);
+    authMethods.signout();
     await Navigator.pushAndRemoveUntil(context,
         MaterialPageRoute(builder: (builder) => MyApp()), (route) => false);
-    // Navigator.push(context, MaterialPageRoute(builder: (context) => MyApp()));
   }
 
   @override
@@ -75,14 +73,14 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
             key: scaffoldKey,
             drawer: Drawer(
               child: Container(
-                color: Colors.white,
+                color: Colors.black,
                 child: ListView(
                   children: [
                     DrawerHeader(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(colors: <Color>[
-                          Color(0xff86A7BA),
-                          Colors.white,
+                          Colors.black,
+                          Color(0xff7399AF),
                         ]),
                       ),
                       child: Column(
@@ -103,7 +101,7 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                           Text(
                             userName,
                             style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                                 letterSpacing: 1),
@@ -111,7 +109,7 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                           Text(
                             userEmail,
                             style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontSize: 14,
                                 letterSpacing: 0),
                           ),
@@ -131,7 +129,9 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                       child: ListTile(
                         title: Text(
                           "Profile",
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -142,7 +142,9 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                       child: ListTile(
                         title: Text(
                           "All users",
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -153,7 +155,9 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                       child: ListTile(
                         title: Text(
                           "Logout",
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -163,6 +167,14 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
             ),
             appBar: AppBar(
               foregroundColor: Color(0xff86A7BA),
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: <Color>[
+                    Colors.black,
+                    Color(0xff7399AF),
+                  ]),
+                ),
+              ),
               leading: IconButton(
                 icon: Icon(
                   Icons.dehaze,
@@ -186,7 +198,7 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                         letterSpacing: 1),
                   ),
                   Text(
-                    userName,
+                    globalUserName,
                     style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -214,7 +226,7 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                 ),
               ],
             ),
-            backgroundColor: Color(0xFFEEEEEE),
+            backgroundColor: Colors.black,
             body: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Container(
@@ -223,17 +235,19 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                 child: Column(
                   children: [
                     Container(
-                      margin: EdgeInsets.all(5),
+                      margin: EdgeInsets.only(
+                          left: 15, right: 15, bottom: 15, top: 25),
                       padding: EdgeInsets.only(
                           left: 15, right: 15, top: 15, bottom: 15),
                       height: 80,
-                      width: MediaQuery.of(context).size.width - 50,
+                      width: MediaQuery.of(context).size.width - 60,
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.black,
+                        border: Border.all(
                           color: Colors.white,
-                          border: Border.all(
-                            color: Colors.black,
-                          )),
+                        ),
+                      ),
                       child: writePost(userPropic, context),
                     ),
                     SingleChildScrollView(

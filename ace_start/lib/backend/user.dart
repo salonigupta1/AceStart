@@ -5,3 +5,4 @@ class User {
 
 String globalUserId;
 String globalUserName;
+String globalPropic;

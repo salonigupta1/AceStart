@@ -41,9 +41,8 @@ class ChatMessage extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: (messageType == "receiver"
-                ? Colors.grey.shade200
-                : Color(0xff86A7BA)),
+            color:
+                (messageType == "receiver" ? Colors.grey : Color(0xff11171A)),
           ),
           padding: EdgeInsets.all(16),
           child: Text(
@@ -127,9 +126,15 @@ class _ChatHomePageState extends State<ChatHomePage> {
     );
     return Scaffold(
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                colors: <Color>[Colors.black, Color(0xff7399AF)]),
+          ),
+        ),
         title: Text("Chat Screen"),
-        backgroundColor: Color(0xff86A7BA),
       ),
+      backgroundColor: Colors.black,
       body: Stack(
         children: <Widget>[
           Container(
@@ -142,7 +147,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
               padding: EdgeInsets.only(left: 10, bottom: 10, top: 10),
               height: 60,
               width: double.infinity,
-              color: Colors.white,
+              color: Color(0xff11171A),
               child: Row(
                 children: <Widget>[
                   SizedBox(
@@ -169,7 +174,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                       color: Colors.white,
                       size: 18,
                     ),
-                    backgroundColor: Color(0xff86A7BA),
+                    backgroundColor: Colors.black,
                     elevation: 0,
                   ),
                 ],

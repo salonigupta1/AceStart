@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:ace_start/InitialPages/login.dart';
 import 'package:ace_start/backend/auth.dart';
 import 'package:ace_start/backend/database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -74,8 +75,13 @@ class _RegisterPage extends State<RegisterPage> {
           await databaseMethods.updateUserInfo(userMap);
           SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setString('userId', x.userId);
+          prefs.setString('userName', nameTextEditingController.text);
+          prefs.setString('userPropic', path ?? "");
+
           setState(() {
             globalUserId = userId;
+            globalUserName = nameTextEditingController.text;
+            globalPropic = path ?? "";
           });
 
           print("WORKING");
@@ -263,7 +269,7 @@ class _RegisterPage extends State<RegisterPage> {
                                                     validator: (val) {
                                                       return val.length > 6
                                                           ? null
-                                                          : "PLEASE TYPE LONGER PASSWORD";
+                                                          : "PLEASE TYPE LONGER BIO";
                                                     },
                                                     keyboardType: TextInputType
                                                         .emailAddress,

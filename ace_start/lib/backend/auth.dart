@@ -63,6 +63,9 @@ class AuthMethods {
       userBio = "";
       userName = "";
       userPropic = "";
+      globalUserName = "";
+      globalUserId = "";
+      globalPropic = "";
       return await _auth.signOut();
     } catch (e) {
       print(e.toString());

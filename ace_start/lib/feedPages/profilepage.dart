@@ -122,6 +122,12 @@ class _ProfilePageState extends State<ProfilePage> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  colors: <Color>[Colors.black, Color(0xff7399AF)]),
+            ),
+          ),
           title: Center(
             child: Text(
               name,
@@ -144,7 +150,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
           ],
         ),
-        backgroundColor: Colors.blue[300],
+        backgroundColor: Colors.black,
         body: SafeArea(
           child: Center(
             child: Column(
@@ -159,6 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text(
                   name,
                   style: TextStyle(
+                    color: Colors.white,
                     fontFamily: 'SourceSansPro',
                     fontSize: 25,
                   ),
@@ -177,7 +184,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child:
-                            Text(bio, style: TextStyle(color: Colors.black38))),
+                            Text(bio, style: TextStyle(color: Colors.white24))),
                   ),
                 ),
                 Card(

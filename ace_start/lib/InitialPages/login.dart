@@ -80,9 +80,16 @@ class _LoginPage extends State<LoginPage> {
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('userId', userId);
+
         userSnapshot = await databaseMethods.getUserByUserId(userId);
+        prefs.setString(
+            'userPropic', userSnapshot.documents[0].data["profile_picture"]);
+        prefs.setString(
+            'userName', userSnapshot.documents[0].data["user_name"]);
         setState(() {
           globalUserId = userId;
+          globalUserName = userSnapshot.documents[0].data["user_name"];
+          globalPropic = userSnapshot.documents[0].data["profile_picture"];
           isLoading = false;
         });
 
@@ -125,8 +132,8 @@ class _LoginPage extends State<LoginPage> {
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                           colors: <Color>[
-                                            Color(0xff094C72),
-                                            Colors.white,
+                                            Colors.black,
+                                            Color(0xff7399AF),
                                           ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.center),
@@ -176,6 +183,13 @@ class _LoginPage extends State<LoginPage> {
                                               padding:
                                                   EdgeInsets.only(bottom: 10),
                                               child: Container(
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                      colors: <Color>[
+                                                        Colors.black,
+                                                        Color(0xff7399AF),
+                                                      ]),
+                                                ),
                                                 height: MediaQuery.of(context)
                                                         .size
                                                         .height *
@@ -186,7 +200,7 @@ class _LoginPage extends State<LoginPage> {
                                                     30,
                                                 child: Material(
                                                   elevation: 10,
-                                                  color: Color(0xff7399AF),
+                                                  color: Color(0xff222D33),
                                                   shape:
                                                       RoundedRectangleBorder(),
                                                   child: Padding(
@@ -237,7 +251,7 @@ class _LoginPage extends State<LoginPage> {
                                                     30,
                                                 child: Material(
                                                   elevation: 10,
-                                                  color: Color(0xff7399AF),
+                                                  color: Color(0xff222D33),
                                                   shape:
                                                       RoundedRectangleBorder(),
                                                   child: Padding(
@@ -295,9 +309,18 @@ class _LoginPage extends State<LoginPage> {
                                             height: 10,
                                           ),
                                           Container(
+                                            height: 35,
                                             width: 150,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(2),
+                                              gradient: LinearGradient(
+                                                  colors: <Color>[
+                                                    Colors.black,
+                                                    Color(0xff7399AF),
+                                                  ]),
+                                            ),
                                             child: MaterialButton(
-                                              color: Color(0xff7399AF),
                                               splashColor: Colors.blue,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:

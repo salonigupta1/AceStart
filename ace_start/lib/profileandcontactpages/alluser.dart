@@ -46,6 +46,7 @@ class _AllUserState extends State<AllUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildBar(context),
+      backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.only(top: 15, bottom: 15),
         child: Container(
@@ -60,7 +61,12 @@ class _AllUserState extends State<AllUser> {
     return new AppBar(
       centerTitle: true,
       title: _appBarTitle,
-      backgroundColor: Color(0xff86A7BA),
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient:
+              LinearGradient(colors: <Color>[Colors.black, Color(0xff7399AF)]),
+        ),
+      ),
       leading: new IconButton(
         icon: _searchIcon,
         onPressed: _searchPressed,
@@ -149,8 +155,8 @@ class DynamicWidget extends StatelessWidget {
       margin: new EdgeInsets.only(left: 15, right: 15, top: 4, bottom: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5.0),
-        // border: Border.all(color: Colors.black38),
-        color: Colors.white10,
+        gradient:
+            LinearGradient(colors: <Color>[Colors.black, Color(0xff7399AF)]),
       ),
       child: new TextButton(
         onPressed: () {
@@ -170,7 +176,7 @@ class DynamicWidget extends StatelessWidget {
           ),
           title: Text(
             name,
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.white),
           ),
         ),
       ),

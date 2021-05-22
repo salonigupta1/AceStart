@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ace_start/backend/user.dart';
 import 'package:ace_start/feedPages/profilepage.dart';
 
+// ignore: must_be_immutable
 class DynamicWidget extends StatelessWidget {
   String i, n, c, uid, bio, photo;
   DynamicWidget(String image, String name, String content, String uid,
@@ -16,11 +17,14 @@ class DynamicWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: new EdgeInsets.only(left: 15, right: 15, top: 4, bottom: 4),
+      margin: new EdgeInsets.only(left: 5, right: 5, top: 4, bottom: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5.0),
         border: Border.all(color: Colors.black26),
-        color: Colors.white,
+        gradient: LinearGradient(colors: <Color>[
+          Colors.black,
+          Color(0xff7399AF),
+        ]),
       ),
       child: new TextButton(
         onPressed: () {
@@ -96,13 +100,13 @@ class DynamicWidget extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           text: TextSpan(
                               text: n == null ? "" : n,
-                              style: TextStyle(color: Colors.black)),
+                              style: TextStyle(color: Colors.white)),
                         ),
                         subtitle: RichText(
                           overflow: TextOverflow.ellipsis,
                           text: TextSpan(
                               text: bio == null ? "" : bio,
-                              style: TextStyle(color: Colors.black26)),
+                              style: TextStyle(color: Colors.white)),
                         ),
                       ),
                     ),
@@ -112,7 +116,7 @@ class DynamicWidget extends StatelessWidget {
               Expanded(
                 child: Text(
                   c,
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ],
