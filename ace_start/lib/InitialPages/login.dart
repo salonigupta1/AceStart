@@ -45,7 +45,7 @@ class _LoginPage extends State<LoginPage> {
 
   void resetPass(String email) async {
     if (!formKey.currentState.validate()) {
-      Toast.show("Enter your mail id and last password you remember", context,
+      Toast.show("Enter your email id and last password you remember", context,
           duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
       return;
     }
